@@ -1,8 +1,10 @@
 ﻿#include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 #include <chrono>
 #include <thread>
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 
 #ifdef _DEBUG
@@ -12,6 +14,8 @@
 #endif
 
 using namespace std;
+
+const string images_directory_path = "./images";
 
 string PixelToAscii(int intensity) {
     const string ASCII = " .,-+!=#@$%";
@@ -26,23 +30,38 @@ int main()
 {
     string file_name, text_file_name;
 
-    cout << "Image file name:";
+    filesystem::directory_iterator it = filesystem::directory_iterator(images_directory_path);
+    vector<string> image_files;
+
+    int unnecessary_len = images_directory_path.length() + 1;
+
+    for (auto e: it) {
+        image_files.push_back(e.path().string().substr(unnecessary_len));
+    }
+
+    cout << "[image files]" << endl;
+    for (auto e: image_files) {
+        cout << "・" << e << endl;
+    }
+
+    cout << "\n" << "Please input image file name >>";
     cin >> file_name;
-    cout << "Text file name:";
+    cout << "Please input text file name >>";
     cin >> text_file_name;
 
     string image_path = "images\\" + file_name;
     cv::Mat image = cv::imread(image_path, 0);
+
     if (image.empty()) {
         cout << "Can't open file [" << file_name << "]" << endl;
         return 1;
     }
 
-    double WIDTH_PIXEL{0}, HEIGHT_PIXEL{0};
+    double WIDTH_PIXEL{ 0 }, HEIGHT_PIXEL{ 0 };
     double width_size_rate, height_size_rate;
     
     while (true) {
-        cout << "Input number of beside pixels (200 ~ 900)" << endl << ">";
+        cout << "Input number of beside pixels (200 ~ 900)" << endl << ">>";
         cin >> WIDTH_PIXEL;
         if (200 <= WIDTH_PIXEL && WIDTH_PIXEL <= 900) {
             HEIGHT_PIXEL = WIDTH_PIXEL / 2;
@@ -79,7 +98,7 @@ int main()
     }
     file.close();
 
-    cout << "==== creation ASCII file successful !! ====" << endl;
+    cout << "\n======== creation ASCII file successful !! ========" << endl;
     this_thread::sleep_for(chrono::milliseconds(1500));
 
     return 0;
